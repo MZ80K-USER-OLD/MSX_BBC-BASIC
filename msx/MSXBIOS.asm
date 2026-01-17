@@ -18,13 +18,16 @@
 		PUBLIC	msxInitText
 		PUBLIC	msxBeep
 		PUBLIC	msxINITXT80
+		PUBLIC	msxINITXT
 		PUBLIC	msxCLS
 		PUBLIC	msxSTRPUT
 		PUBLIC  msxCHPUT
-		PUBLIC	msxINLINE
+		PUBLIC	msxPINLINE
 		PUBLIC  msxPOSIT
 		PUBLIC	msxGETPOS
 		PUBLIC	msxCheckMSX2
+		;
+
 
 IFNDEF BDOS
 BDOS		EQU	$0005			; MSX-DOS API CALL
@@ -32,7 +35,6 @@ ENDIF
 ; ------------------------------------------------------------------------------
 ;  MSX BIOS entries
 ;
-DEFINE MSXBIOS
 CALSLT		EQU	$001C
 IDBYT0		EQU	$002B
 INITXT		EQU	$006C			; select screen mode 0
@@ -139,24 +141,37 @@ msxSTRPUT:
 ; A=Character
 ;
 msxCHPUT:
+		PUSH IX
 		LD	IX,CHPUT      
-		CALL msxBIOS	
-		POP HL
-		JR msxSTRPUT
+		CALL msxBIOS
+		POP IX	
+		RET
 
 ;
 ; Input line
+;  INPUT:Nothing
+;  OUTPUT: HL=Address of input buffer
 ;  CY:CTRL-STOP
 ;
-msxINLINE:
+msxPINLINE:
 		PUSH IX
-		LD  HL,BUF
-		DEC HL
 		LD	IX,PINLINE   ; 一行入力
 		CALL msxBIOS
-		LD HL,BUF
+		INC HL
 		POP IX	
 		RET            ; CTRL-STOPが押されたらCY=1	
+
+; Init Screen   
+;  Screen 0, width 40
+;
+msxINITXT:
+		PUSH  IX
+		LD  A,40
+		LD	(LINL40),A		; set 40 column width
+		LD	IX,INITXT
+		CALL msxBIOS
+		POP IX
+		RET
 ;
 ; Init Screen   
 ;  Screen 0, width 80
@@ -164,7 +179,7 @@ msxINLINE:
 msxINITXT80:
 		PUSH  IX
 		LD  A,80
-		LD	(LINL40),A		; set 40/80 column width
+		LD	(LINL40),A		; set 80 column width
 		LD	IX,INITXT
 		CALL msxBIOS
 		POP IX
@@ -196,8 +211,7 @@ ERRMSX1:
 		LD C,$00
 		CALL BDOS		; EXIT TO OS
 
-msg:	db	"You need MSX2 or over$"
-
+msg:	db	"You need MSX2 or over",0DH,0AH,"$"
 
 ; ------------------------------------------------------------------------------
 ; MSX BIOS routines, interslot call wrapper
