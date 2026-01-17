@@ -16,6 +16,10 @@
 ;R.T.RUSSELL, 11-03-1984, 03-05-1989, 12-05-2024
 ;
 CPM	EQU	5
+
+
+	SECTION  BASIC
+
 ;COLD	EQU	200H
 ;
 	GLOBAL	CLRSCN
@@ -25,12 +29,15 @@ CPM	EQU	5
 	GLOBAL	GETIME
 	GLOBAL	GETKEY
 	GLOBAL	BYE
-
-;	MSXBIOS
-	EXTERN	msxCheckMSX2
 ;	MAIN
 	EXTERN	COLD
-	;ASEG
+
+#ifdef MSXBIOS
+;	MSXBIOS
+	EXTERN	msxCheckMSX2
+
+#endif
+
 	ORG	100H
 ;
 ;JUMP TABLE - BASIC makes calls to hardware-dependent
@@ -58,7 +65,9 @@ BDOS:	PUSH	IX
 ;INIT	- Perform hardware initialisation (if any).
 ;
 INIT:
+#ifdef MSXBIOS
 	CALL msxCheckMSX2
+#endif
 	JP COLD
 ; check Z80 CPU
 ;	LD	A,2
@@ -145,6 +154,7 @@ DIV1:	RL	E
 	EX	DE,HL
 	POP	DE
 	RET
+
 ;
 ;INKEY	- Sample keyboard with specified wait.
 ;   	  Inputs: HL = Time to wait (centiseconds)
@@ -210,12 +220,15 @@ COUT:	PUSH	BC
 	POP	DE
 	POP	BC
 	RET
+
+
 ;
 	IF	$ >  1F0H
 	ERROR	"INSUFFICIENT SPACE"
 	ENDIF
 ;
-	PHASE	1F0H
+	SECTION BSEG
+;	ORG 01F0H
 ;
 OFFLO:	DEFW	0		;TIME OFFSET LO
 OFFHI:	DEFW	0		;TIME OFFSET HI
