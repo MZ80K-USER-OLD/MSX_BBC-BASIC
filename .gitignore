@@ -47,3 +47,6 @@ build/
 *~
 #*
 .#*
+
+# Local MSX build counter
+msx/.build-number

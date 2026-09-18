@@ -25,6 +25,20 @@ while connecting them to the appropriate MSX-DOS and MSX BIOS services.
 Note that the name 'BBC BASIC' is used by permission of the British Broadcasting Corporation
 and is not transferrable to a derived or forked work.
 
+# MSXnano (OCM) Compatibility Notes
+
+Testing on real MSXnano (OCM) hardware uncovered two platform-specific issues, fixed
+in v5.01:
+
+- **Keyboard buffer**: `msxPINLINE` (`msx/MSXBIOS.asm`) now clears the MSX BIOS
+  keyboard buffer (`KILBUF`) and the shared line-input buffer (`BUF`, `$F55E`) before
+  calling `PINLINE`. Without this, stale text from a previous input line could be
+  re-edited/merged into the next line, corrupting the program listing.
+- **Z80 refresh register (R)**: The `RUN` command's random-seed initialisation
+  (`RUN0` in `BBCZ80/EXEC.asm`) no longer reads the Z80 `R` register in a loop. On
+  MSXnano the `R` register is not incremented reliably, which caused `RUN` to hang
+  indefinitely. The seed is now taken from the MSX `JIFFY` VBLANK counter instead.
+
 # MSX-DOS2 Subdirectory Support
 
 On MSX-DOS2, `LOAD`, `*LOAD`, and program loading through `CHAIN` or `RUN` can
@@ -35,10 +49,10 @@ LOAD "SUBDIR\\PROGRAM"
 *LOAD SUBDIR\\PROGRAM
 ```
 
-The MSX-DOS2 build opens these files through DOS2 file handles. The existing
-FCB-based implementation is retained for MSX-DOS1 and CP/M-compatible systems.
-Other file commands, including `OPENIN`, `OPENOUT`, `OPENUP`, and `SAVE`, still
-use the legacy FCB path and do not yet provide subdirectory support.
+The MSX-DOS2 build uses DOS2 file handles for `LOAD`, `SAVE`, `OPENIN`,
+`OPENOUT`, `OPENUP`, byte I/O, and SPOOL/EXEC. These operations support DOS2
+paths and do not use CP/M File Control Blocks (FCBs). The FCB implementation is
+retained only in the CP/M-conditional assembly path.
 
 # Repository Structure
 

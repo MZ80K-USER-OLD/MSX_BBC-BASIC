@@ -1,0 +1,5 @@
+{
+  "terminal.integrated.env.windows": {
+    "Path": "D:\\Tool\\z88dk\\bin;${env:Path}"
+  }
+}

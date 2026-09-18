@@ -31,7 +31,12 @@ CPM	EQU	5
 	GLOBAL	BYE
 ;	MAIN
 	EXTERN	COLD
-
+	EXTERN	OSCLI
+	EXTERN	OSBGET
+	EXTERN	OSBPUT
+	EXTERN	OSSTAT
+	EXTERN	OSSHUT
+	
 #ifdef MSXBIOS
 ;	MSXBIOS
 	EXTERN	msxCheckMSX2
@@ -51,6 +56,12 @@ PUTIME:	JP	PTIME	;SET ELAPSED TIME
 GETIME:	JP	GTIME	;READ ELAPSED TIME
 GETKEY:	JP	INKEY	;READ KEY (TIME LIMIT)
 BYE:	JP	REBOOT	;RETURN TO CP/M
+MOS_OSCLI:	JP	OSCLI
+MOS_OSBGET:	JP	OSBGET
+MOS_OSBPUT:	JP	OSBPUT
+MOS_OSSTAT:	JP	OSSTAT
+MOS_OSSHUT:	JP	OSSHUT
+
 ;
 ;BDOS	- Save the IX and IY registers and before performing a
 ;	  CP/M function call.
@@ -113,6 +124,12 @@ PTIME:	PUSH	BC
 ;  Outputs: DEHL = time (centiseconds)
 ; Destroys: A,B,C,D,E,H,L,F
 ;
+#ifdef MSXBIOS
+TICKS:	LD	HL,($FC9E)
+	LD	E,($FCA0)
+	LD	D,0
+	RET
+#else
 TICKS:	LD	C,248		;RunCPM-specific function call
 	CALL	BDOS
 	PUSH	DE
@@ -136,6 +153,7 @@ DIV1:	RL	E
 	EX	DE,HL
 	POP	DE
 	RET
+#endif
 
 ;
 ;INKEY	- Sample keyboard with specified wait.

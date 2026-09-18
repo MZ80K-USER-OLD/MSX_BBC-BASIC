@@ -44,6 +44,10 @@
 	GLOBAL	FILE_MAXSIZE
 	GLOBAL	FILE_BUFADRS
 	GLOBAL	REQ_BYTES
+	GLOBAL	DOS2_HANDLES
+	GLOBAL	DOS2_EOF
+	GLOBAL	DOS2_IOBUF
+	GLOBAL	PATHBUF2
 
 	ORG $5000
 
@@ -86,7 +90,11 @@ FILE_HANDLE:	DEFS	1		;MSX-DOS2 file handle used by OSLOAD
 FILE_BUFADRS:	DEFS	2		; バッファのアドレス保存用
 FILE_MAXSIZE:	DEFS	2		; 最大読み込みバイト数
 REQ_BYTES:      DEFS    2       ; 読み込み要求バイト数
+DOS2_HANDLES:	DEFS	9		; DOS2 file handles, indexed by BASIC channel
+DOS2_EOF:	DEFS	9		; EOF flags, indexed by BASIC channel
+DOS2_IOBUF:	DEFS	1		; Single-byte BGET/BPUT transfer buffer
 PATHBUF:	DEFS	64		;PATH WORK BUFFER FOR MSX-DOS2 / SUBDIR SUPPORT
+PATHBUF2:	DEFS	64		;Second pathname for MSX-DOS2 rename
 DOS_VER:	DEFS	1		;MSX-DOS VERSION
 DIRFIB:	DEFS	64		;MSX-DOS2 FFIRST/FNEXT file information block
 ;-------

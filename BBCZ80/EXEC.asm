@@ -275,8 +275,11 @@ CHAIN0:	LD	SP,(HIMEM)
 	CALL	LOAD0
 RUN0:	LD	SP,(HIMEM)	;PREPARE FOR RUN
 	LD	IX,RANDOM
-RAND:	LD	A,R		;RANDOMISE (CARE!)
-	JR	Z,RAND
+;	Original code used the Z80 refresh register as a seed, but this can
+;	hang if R is not incremented correctly on some MSX hardware/cores:
+;RAND:	LD	A,R		;RANDOMISE (CARE!)
+;	JR	Z,RAND
+	LD	A,(0FC9EH)	;JIFFY - MSX VBLANK COUNTER (avoids R register)
 	RLCA
 	RLCA
 	LD	(IX+3),A

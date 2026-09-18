@@ -46,6 +46,7 @@ BEEP		EQU	$00C0
 POSIT		EQU $00C6    		; カーソル位置指定
 CLS		    EQU $00C3    		; 画面消去
 PINLINE		EQU $00AE           ; 一行入力
+KILBUF		EQU $0156           ; Clear input buffer
 
 BUFMIN		EQU $F55D           ; 入力バッファ-1
 BUF		    EQU $F55E           ; BASIC 入力バッファ、終端が0
@@ -155,6 +156,10 @@ msxCHPUT:
 ;
 msxPINLINE:
 		PUSH IX
+		LD IX,KILBUF
+		CALL msxBIOS
+		XOR	A
+		LD	(BUF),A		; clear stale text so PINLINE doesn't re-edit it
 		LD	IX,PINLINE   ; 一行入力
 		CALL msxBIOS
 		INC HL
