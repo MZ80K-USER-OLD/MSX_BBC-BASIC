@@ -37,214 +37,176 @@
     36                          	EXTERN	OSBPUT
     37                          	EXTERN	OSSTAT
     38                          	EXTERN	OSSHUT
-    39                          
-    40                          #ifdef MSXBIOS
-    41                          ;	MSXBIOS
-    42                          	EXTERN	msxCheckMSX2
-    43                          
-    44                          #endif
-    45                          
-    46                          	ORG	100H
+    39                          	EXTERN	OSVERCHK
+    40                          	EXTERN	OSGETTICK
+    41                          
+    42                          
+    43                          	ORG	100H
+    44                          ;
+    45                          ;JUMP TABLE - BASIC makes calls to hardware-dependent
+    46                          ;features via this table:
     47                          ;
-    48                          ;JUMP TABLE - BASIC makes calls to hardware-dependent
-    49                          ;features via this table:
-    50                          ;
-    51  0000  c33300            INIT0:	JP	INIT	;INITIALISE HARDWARE
-    52  0003  c39000            CLRSCN:	JP	CLS		;CLEAR SCREEN
-    53  0006  c39100            PUTCSR:	JP	PCSR	;SET CURSOR POSN.
-    54  0009  c39200            GETCSR:	JP	GCSR	;READ CURSOR POSN.
-    55  000c  c34d00            PUTIME:	JP	PTIME	;SET ELAPSED TIME
-    56  000f  c33a00            GETIME:	JP	GTIME	;READ ELAPSED TIME
-    57  0012  c36e00            GETKEY:	JP	INKEY	;READ KEY (TIME LIMIT)
-    58  0015  c33900            BYE:	JP	REBOOT	;RETURN TO CP/M
-    59  0018  c30000            MOS_OSCLI:	JP	OSCLI
-    60  001b  c30000            MOS_OSBGET:	JP	OSBGET
-    61  001e  c30000            MOS_OSBPUT:	JP	OSBPUT
-    62  0021  c30000            MOS_OSSTAT:	JP	OSSTAT
-    63  0024  c30000            MOS_OSSHUT:	JP	OSSHUT
-    64                          
-    65                          ;
-    66                          ;BDOS	- Save the IX and IY registers and before performing a
-    67                          ;	  CP/M function call.
-    68                          ;
-    69  0027  dde5              BDOS:	PUSH	IX
-    70  0029  fde5              	PUSH	IY
-    71  002b  cd0500            	CALL	CPM
-    72  002e  fde1              	POP	IY
-    73  0030  dde1              	POP	IX
-    74  0032  c9                	RET
+    48  0000  c32400            INIT0:	JP	INIT	;INITIALISE HARDWARE
+    49  0003  c37d00            CLRSCN:	JP	CLS		;CLEAR SCREEN
+    50  0006  c37e00            PUTCSR:	JP	PCSR	;SET CURSOR POSN.
+    51  0009  c37f00            GETCSR:	JP	GCSR	;READ CURSOR POSN.
+    52  000c  c33e00            PUTIME:	JP	PTIME	;SET ELAPSED TIME
+    53  000f  c32b00            GETIME:	JP	GTIME	;READ ELAPSED TIME
+    54  0012  c35b00            GETKEY:	JP	INKEY	;READ KEY (TIME LIMIT)
+    55  0015  c32a00            BYE:	JP	REBOOT	;RETURN TO CP/M
+    56                          
+    57                          ;
+    58                          ;BDOS	- Save the IX and IY registers and before performing a
+    59                          ;	  CP/M function call.
+    60                          ;
+    61  0018  dde5              BDOS:	PUSH	IX
+    62  001a  fde5              	PUSH	IY
+    63  001c  cd0500            	CALL	CPM
+    64  001f  fde1              	POP	IY
+    65  0021  dde1              	POP	IX
+    66  0023  c9                	RET
+    67                          ;
+    68                          ;INIT	- Perform hardware initialisation (if any).
+    69                          ;
+    70                          INIT:
+    71  0024  cd0000            	CALL OSVERCHK;	OS ROM version check
+    72  0027  c30000            	JP COLD
+    73                          
+    74  002a  c7                REBOOT:	RST	0
     75                          ;
-    76                          ;INIT	- Perform hardware initialisation (if any).
-    77                          ;
-    78                          INIT:
-    79                          #ifdef MSXBIOS
-    80  0033  cd0000            	CALL msxCheckMSX2
-    81                          #endif
-    82  0036  c30000            	JP COLD
-    83                          
-    84  0039  c7                REBOOT:	RST	0
-    85                          ;
-    86                          ;GTIME	- Read elapsed-time clock.
-    87                          ;  	  Outputs: DEHL = elapsed time (centiseconds)
-    88                          ; 	  Destroys: A,D,E,H,L,F
-    89                          ;
-    90  003a  c5                GTIME:	PUSH	BC
-    91  003b  cd6600            	CALL	TICKS
-    92  003e  ed4b0000          	LD	BC,(OFFLO)
-    93  0042  09                	ADD	HL,BC
-    94  0043  eb                	EX	DE,HL
-    95  0044  ed4b0200          	LD	BC,(OFFHI)
-    96  0048  ed4a              	ADC	HL,BC
-    97  004a  eb                	EX	DE,HL
-    98  004b  c1                	POP	BC
-    99  004c  c9                	RET
-   100                          ;
-   101                          ;PTIME	- Load elapsed-time clock.
-   102                          ;   	  Inputs: DEHL = time to load (centiseconds)
-   103                          ; 	  Destroys: A,D,E,H,L,F
-   104                          ;
-   105  004d  c5                PTIME:	PUSH	BC
-   106  004e  d5                	PUSH	DE
-   107  004f  e5                	PUSH	HL
-   108  0050  cd6600            	CALL	TICKS
-   109  0053  44                	LD	B,H
-   110  0054  4d                	LD	C,L
-   111  0055  e1                	POP	HL
-   112  0056  b7                	OR	A
-   113  0057  ed42              	SBC	HL,BC
-   114  0059  220000            	LD	(OFFLO),HL
-   115  005c  42                	LD	B,D
-   116  005d  4b                	LD	C,E
-   117  005e  e1                	POP	HL
-   118  005f  ed42              	SBC	HL,BC
-   119  0061  220200            	LD	(OFFHI),HL
-   120  0064  c1                	POP	BC
-   121  0065  c9                	RET
-   122                          ;
-   123                          ; Get OS elapsed-time clock
-   124                          ;  Outputs: DEHL = time (centiseconds)
-   125                          ; Destroys: A,B,C,D,E,H,L,F
+    76                          ;GTIME	- Read elapsed-time clock.
+    77                          ;  	  Outputs: DEHL = elapsed time (centiseconds)
+    78                          ; 	  Destroys: A,D,E,H,L,F
+    79                          ;
+    80  002b  c5                GTIME:	PUSH	BC
+    81  002c  cd5700            	CALL	TICKS
+    82  002f  ed4b0000          	LD	BC,(OFFLO)
+    83  0033  09                	ADD	HL,BC
+    84  0034  eb                	EX	DE,HL
+    85  0035  ed4b0200          	LD	BC,(OFFHI)
+    86  0039  ed4a              	ADC	HL,BC
+    87  003b  eb                	EX	DE,HL
+    88  003c  c1                	POP	BC
+    89  003d  c9                	RET
+    90                          ;
+    91                          ;PTIME	- Load elapsed-time clock.
+    92                          ;   	  Inputs: DEHL = time to load (centiseconds)
+    93                          ; 	  Destroys: A,D,E,H,L,F
+    94                          ;
+    95  003e  c5                PTIME:	PUSH	BC
+    96  003f  d5                	PUSH	DE
+    97  0040  e5                	PUSH	HL
+    98  0041  cd5700            	CALL	TICKS
+    99  0044  44                	LD	B,H
+   100  0045  4d                	LD	C,L
+   101  0046  e1                	POP	HL
+   102  0047  b7                	OR	A
+   103  0048  ed42              	SBC	HL,BC
+   104  004a  220000            	LD	(OFFLO),HL
+   105  004d  42                	LD	B,D
+   106  004e  4b                	LD	C,E
+   107  004f  e1                	POP	HL
+   108  0050  ed42              	SBC	HL,BC
+   109  0052  220200            	LD	(OFFHI),HL
+   110  0055  c1                	POP	BC
+   111  0056  c9                	RET
+   112                          ;
+   113                          ; Get OS elapsed-time clock
+   114                          ;  Outputs: DEHL = time (centiseconds)
+   115                          ; Destroys: A,B,C,D,E,H,L,F
+   116                          ;
+   117                          TICKS:
+   118  0057  cd0000            	CALL OSGETTICK
+   119  005a  c9                	RET
+   120                          ;
+   121                          ;INKEY	- Sample keyboard with specified wait.
+   122                          ;   	  Inputs: HL = Time to wait (centiseconds)
+   123                          ;  	  Outputs: Carry reset indicates time-out.
+   124                          ;                  If carry set, A = character typed.
+   125                          ; 	  Destroys: A,D,E,H,L,F
    126                          ;
-   127                          #ifdef MSXBIOS
-   128  0066  2a9efc            TICKS:	LD	HL,($FC9E)
-   129  0069  1ea0              	LD	E,($FCA0)
-   130  006b  1600              	LD	D,0
-   131  006d  c9                	RET
-   132                          #else
-   133                          TICKS:	LD	C,248		;RunCPM-specific function call
-   134                          	CALL	BDOS
-   135                          	PUSH	DE
-   136                          	EX	DE,HL
-   137                          	OR	A
-   138                          	SBC	HL,HL
-   139                          	LD	BC,-5
-   140                          	LD	A,32
-   141                          DIV0:	ADD	HL,BC
-   142                          	JP	C,DIV1
-   143                          	SBC	HL,BC
-   144                          DIV1:	RL	E
-   145                          	RL	D
-   146                          	EX	(SP),HL
-   147                          	RL	L
-   148                          	RL	H
-   149                          	EX	(SP),HL
-   150                          	ADC	HL,HL
-   151                          	DEC	A
-   152                          	JP	NZ,DIV0
-   153                          	EX	DE,HL
-   154                          	POP	DE
-   155                          	RET
-   156                          #endif
-   157                          
-   158                          ;
-   159                          ;INKEY	- Sample keyboard with specified wait.
-   160                          ;   	  Inputs: HL = Time to wait (centiseconds)
-   161                          ;  	  Outputs: Carry reset indicates time-out.
-   162                          ;                  If carry set, A = character typed.
-   163                          ; 	  Destroys: A,D,E,H,L,F
-   164                          ;
-   165  006e  c5                INKEY:	PUSH	BC
-   166  006f  e5                	PUSH	HL
-   167  0070  cd6600            	CALL	TICKS
-   168  0073  d1                	POP	DE
-   169  0074  19                	ADD	HL,DE
-   170  0075  e5                WAIT:	PUSH	HL
-   171  0076  0e06              	LD	C,6
-   172  0078  1eff              	LD	E,0FFH
-   173  007a  cd2700            	CALL	BDOS
-   174  007d  e1                	POP	HL
-   175  007e  b7                	OR	A
-   176  007f  37                	SCF
-   177  0080  c28e00            	JP	NZ,INKEY1
-   178  0083  e5                	PUSH	HL
-   179  0084  cd6600            	CALL	TICKS
-   180  0087  d1                	POP	DE
-   181  0088  ed52              	SBC	HL,DE
-   182  008a  eb                	EX	DE,HL
-   183  008b  da7500            	JP	C,WAIT
-   184  008e  c1                INKEY1:	POP	BC
-   185  008f  c9                	RET
-   186                          ;
-   187                          ;CLS	- Clear screen.
-   188                          ;	  (Customise to suit your VDU)
-   189                          ; 	  Destroys: A,D,E,H,L,F
-   190                          ;
-   191  0090  c9                CLS:	RET
-   192                          ;
-   193                          ;PCSR	- Move cursor to specified position.
-   194                          ;   	  Inputs: DE = horizontal position (LHS=0)
-   195                          ;                 HL = vertical position (TOP=0)
-   196                          ; 	  Destroys: A,D,E,H,L,F
-   197                          ;
-   198  0091  c9                PCSR:	RET
-   199                          ;
-   200                          ;GCSR	- Return cursor coordinates.
-   201                          ;   	  Outputs:  DE = X coordinate (POS)
-   202                          ;                   HL = Y coordinate (VPOS)
-   203                          ;  	  Destroys: A,D,E,H,L,F
-   204                          ;
-   205  0092  110000            GCSR:	LD	DE,0
-   206  0095  210000            	LD	HL,0
-   207  0098  c9                	RET
-   208                          ;
-   209                          ;COUT - Output a character to the console
-   210                          ;   Inputs: A = character
-   211                          ; Destroys: A,F
-   212                          ;
-   213  0099  c5                COUT:	PUSH	BC
-   214  009a  d5                	PUSH	DE
-   215  009b  e5                	PUSH	HL
-   216  009c  5f                	LD	E,A
-   217  009d  0e02              	LD	C,2
-   218  009f  cd2700            	CALL	BDOS
-   219  00a2  e1                	POP	HL
-   220  00a3  d1                	POP	DE
-   221  00a4  c1                	POP	BC
-   222  00a5  c9                	RET
-   223                          
-   224                          
-   225                          ;
-   226                          	IF	$ >  1F0H
-   227                          	ERROR	"INSUFFICIENT SPACE"
-   228                          	ENDIF
-   229                          ;
-   230                          	SECTION TERMSEG
-   231                          	ORG 01F0H
-   232                          ;
-   233  0000  0000              OFFLO:		DEFW	0		;TIME OFFSET LO
-   234  0002  0000              OFFHI:		DEFW	0		;TIME OFFSET HI
-   235  0004  50                WIDTH:		DEFB	80		;WIDTH
-   236  0005  07                CURUP:		DEFB	'G' & 1FH	;CURSOR UP
-   237  0006  0f                CURDOWN:	DEFB	'O' & 1FH	;CURSOR DOWN
-   238  0007  06                CURHOME:	DEFB	'F' & 1FH	;START OF LINE
-   239  0008  0e                CUREND:		DEFB	'N' & 1FH	;END OF LINE
-   240  0009  18                DELLINE:	DEFB	'X' & 1FH	;DELETE TO END OF LINE
-   241  000a  08                BACKSP:		DEFB	08H		;BACKSPACE & DELETE
-   242  000b  15                DELTOST:	DEFB	'U' & 1FH	;DEL TO START OF LINE
-   243  000c  0a                CURLEFT:	DEFB	'J' & 1FH	;CURSOR LEFT
-   244  000d  0c                CURRIGHT:	DEFB	'L' & 1FH	;CURSOR RIGHT
-   245  000e  12                DELCHR:		DEFB	'R' & 1FH	;DELETE CHARACTER
-   246  000f  11                INSCHR:		DEFB	'Q' & 1FH	;INS/OVR TOGGLE
-   247                          ;
-   248                          FIN:	;END
-   249                          
+   127  005b  c5                INKEY:	PUSH	BC
+   128  005c  e5                	PUSH	HL
+   129  005d  cd5700            	CALL	TICKS
+   130  0060  d1                	POP	DE
+   131  0061  19                	ADD	HL,DE
+   132  0062  e5                WAIT:	PUSH	HL
+   133  0063  0e06              	LD	C,6
+   134  0065  1eff              	LD	E,0FFH
+   135  0067  cd1800            	CALL	BDOS
+   136  006a  e1                	POP	HL
+   137  006b  b7                	OR	A
+   138  006c  37                	SCF
+   139  006d  c27b00            	JP	NZ,INKEY1
+   140  0070  e5                	PUSH	HL
+   141  0071  cd5700            	CALL	TICKS
+   142  0074  d1                	POP	DE
+   143  0075  ed52              	SBC	HL,DE
+   144  0077  eb                	EX	DE,HL
+   145  0078  da6200            	JP	C,WAIT
+   146  007b  c1                INKEY1:	POP	BC
+   147  007c  c9                	RET
+   148                          ;
+   149                          ;CLS	- Clear screen.
+   150                          ;	  (Customise to suit your VDU)
+   151                          ; 	  Destroys: A,D,E,H,L,F
+   152                          ;
+   153  007d  c9                CLS:	RET
+   154                          ;
+   155                          ;PCSR	- Move cursor to specified position.
+   156                          ;   	  Inputs: DE = horizontal position (LHS=0)
+   157                          ;                 HL = vertical position (TOP=0)
+   158                          ; 	  Destroys: A,D,E,H,L,F
+   159                          ;
+   160  007e  c9                PCSR:	RET
+   161                          ;
+   162                          ;GCSR	- Return cursor coordinates.
+   163                          ;   	  Outputs:  DE = X coordinate (POS)
+   164                          ;                   HL = Y coordinate (VPOS)
+   165                          ;  	  Destroys: A,D,E,H,L,F
+   166                          ;
+   167  007f  110000            GCSR:	LD	DE,0
+   168  0082  210000            	LD	HL,0
+   169  0085  c9                	RET
+   170                          ;
+   171                          ;COUT - Output a character to the console
+   172                          ;   Inputs: A = character
+   173                          ; Destroys: A,F
+   174                          ;
+   175  0086  c5                COUT:	PUSH	BC
+   176  0087  d5                	PUSH	DE
+   177  0088  e5                	PUSH	HL
+   178  0089  5f                	LD	E,A
+   179  008a  0e02              	LD	C,2
+   180  008c  cd1800            	CALL	BDOS
+   181  008f  e1                	POP	HL
+   182  0090  d1                	POP	DE
+   183  0091  c1                	POP	BC
+   184  0092  c9                	RET
+   185                          
+   186                          
+   187                          ;
+   188                          	IF	$ >  1F0H
+   189                          	ERROR	"INSUFFICIENT SPACE"
+   190                          	ENDIF
+   191                          ;
+   192                          	SECTION TERMSEG
+   193                          	ORG 01F0H
+   194                          ;
+   195  0000  0000              OFFLO:		DEFW	0		;TIME OFFSET LO
+   196  0002  0000              OFFHI:		DEFW	0		;TIME OFFSET HI
+   197  0004  50                WIDTH:		DEFB	80		;WIDTH
+   198  0005  07                CURUP:		DEFB	'G' & 1FH	;CURSOR UP
+   199  0006  0f                CURDOWN:	DEFB	'O' & 1FH	;CURSOR DOWN
+   200  0007  06                CURHOME:	DEFB	'F' & 1FH	;START OF LINE
+   201  0008  0e                CUREND:		DEFB	'N' & 1FH	;END OF LINE
+   202  0009  18                DELLINE:	DEFB	'X' & 1FH	;DELETE TO END OF LINE
+   203  000a  08                BACKSP:		DEFB	08H		;BACKSPACE & DELETE
+   204  000b  15                DELTOST:	DEFB	'U' & 1FH	;DEL TO START OF LINE
+   205  000c  0a                CURLEFT:	DEFB	'J' & 1FH	;CURSOR LEFT
+   206  000d  0c                CURRIGHT:	DEFB	'L' & 1FH	;CURSOR RIGHT
+   207  000e  12                DELCHR:		DEFB	'R' & 1FH	;DELETE CHARACTER
+   208  000f  11                INSCHR:		DEFB	'Q' & 1FH	;INS/OVR TOGGLE
+   209                          ;
+   210                          FIN:	;END
+   211                          

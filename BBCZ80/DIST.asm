@@ -36,12 +36,9 @@ CPM	EQU	5
 	EXTERN	OSBPUT
 	EXTERN	OSSTAT
 	EXTERN	OSSHUT
+	EXTERN	OSVERCHK
+	EXTERN	OSGETTICK
 	
-#ifdef MSXBIOS
-;	MSXBIOS
-	EXTERN	msxCheckMSX2
-
-#endif
 
 	ORG	100H
 ;
@@ -56,11 +53,6 @@ PUTIME:	JP	PTIME	;SET ELAPSED TIME
 GETIME:	JP	GTIME	;READ ELAPSED TIME
 GETKEY:	JP	INKEY	;READ KEY (TIME LIMIT)
 BYE:	JP	REBOOT	;RETURN TO CP/M
-MOS_OSCLI:	JP	OSCLI
-MOS_OSBGET:	JP	OSBGET
-MOS_OSBPUT:	JP	OSBPUT
-MOS_OSSTAT:	JP	OSSTAT
-MOS_OSSHUT:	JP	OSSHUT
 
 ;
 ;BDOS	- Save the IX and IY registers and before performing a
@@ -76,9 +68,7 @@ BDOS:	PUSH	IX
 ;INIT	- Perform hardware initialisation (if any).
 ;
 INIT:
-#ifdef MSXBIOS
-	CALL msxCheckMSX2
-#endif
+	CALL OSVERCHK;	OS ROM version check
 	JP COLD
 
 REBOOT:	RST	0
@@ -124,37 +114,9 @@ PTIME:	PUSH	BC
 ;  Outputs: DEHL = time (centiseconds)
 ; Destroys: A,B,C,D,E,H,L,F
 ;
-#ifdef MSXBIOS
-TICKS:	LD	HL,($FC9E)
-	LD	E,($FCA0)
-	LD	D,0
+TICKS:
+	CALL OSGETTICK
 	RET
-#else
-TICKS:	LD	C,248		;RunCPM-specific function call
-	CALL	BDOS
-	PUSH	DE
-	EX	DE,HL
-	OR	A
-	SBC	HL,HL
-	LD	BC,-5
-	LD	A,32
-DIV0:	ADD	HL,BC
-	JP	C,DIV1
-	SBC	HL,BC
-DIV1:	RL	E
-	RL	D
-	EX	(SP),HL
-	RL	L
-	RL	H
-	EX	(SP),HL
-	ADC	HL,HL
-	DEC	A
-	JP	NZ,DIV0
-	EX	DE,HL
-	POP	DE
-	RET
-#endif
-
 ;
 ;INKEY	- Sample keyboard with specified wait.
 ;   	  Inputs: HL = Time to wait (centiseconds)

@@ -50,3 +50,6 @@ build/
 
 # Local MSX build counter
 msx/.build-number
+
+# MSX build output
+/msx/obj/

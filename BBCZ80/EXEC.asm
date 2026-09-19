@@ -279,7 +279,12 @@ RUN0:	LD	SP,(HIMEM)	;PREPARE FOR RUN
 ;	hang if R is not incremented correctly on some MSX hardware/cores:
 ;RAND:	LD	A,R		;RANDOMISE (CARE!)
 ;	JR	Z,RAND
-	LD	A,(0FC9EH)	;JIFFY - MSX VBLANK COUNTER (avoids R register)
+;
+;	LD	A,(0FC9EH)	;JIFFY - MSX VBLANK COUNTER (avoids R register)
+RAND:
+	LD A,R
+	OR A
+	JR Z,RAND
 	RLCA
 	RLCA
 	LD	(IX+3),A

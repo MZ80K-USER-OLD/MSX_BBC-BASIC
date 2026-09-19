@@ -32,9 +32,8 @@
 	GLOBAL  PrintAddress
 	GLOBAL  PUTCRLF
 	GLOBAL  STRPUT
-	GLOBAL  HOPEN
-	GLOBAL  HCLOSE
-	GLOBAL  HREAD
+	GLOBAL  CHGWIDTH
+	GLOBAL	OSVERCHK
 
 ; Primary OS routines
 	GLOBAL	CLS
@@ -44,9 +43,7 @@
 	GLOBAL  GTIME
 	GLOBAL  INKEY
 	GLOBAL  INITTXT
-
-
-;
+	GLOBAL	OSGETTICK
 	EXTERN	BYE
 	EXTERN	GETKEY
 ;
@@ -76,20 +73,23 @@
 	EXTERN	PATHBUF2
 
 ;MSXBIOS specific routines
-	EXTERN msxKey
-	EXTERN msxPINLINE 
-	EXTERN msxPOSIT
-	EXTERN msxGETPOS
-	EXTERN msxINITXT80
-	EXTERN msxINITXT
-	EXTERN msxCheckMSXDOS
-	EXTERN msxCLS
-	EXTERN msxSTRPUT
-	EXTERN msxCHPUT
+	EXTERN	msxKey
+	EXTERN	msxPINLINE 
+	EXTERN	msxPOSIT
+	EXTERN	msxGETPOS
+	EXTERN	msxINITXT80
+	EXTERN	msxCheckMSXDOS
+	EXTERN	msxCLS
+	EXTERN	msxSTRPUT
+	EXTERN	msxCHPUT
+	EXTERN	msxCheckMSX2
+	EXTERN	msxGETTICK
 
 IFNDEF BDOS
 BDOS		EQU	$0005			; MSX-DOS API CALL
 ENDIF
+
+INCLUDE "MSXBIOS.def"
 ;
 ;
 ;OSSAVE - Save an area of memory to a file.
@@ -2049,9 +2049,11 @@ OSWRCH:	PUSH	AF
 ;
 OSLINE:	
 INLINE:
+	XOR	A
+	LD (CSTYLE),A		; curstyle square
 	EX DE,HL
 	PUSH DE
-	CALL msxPINLINE   ; 一行入力 入力先 BUF
+	CALL msxPINLINE   	; 一行入力 入力先 BUF
     POP DE
 	JR C,OSLINE_STOP   ; CTRL-STOPが押されたら終わり
 INLINE0:
@@ -2080,8 +2082,24 @@ OSLINE_STOP:
 ;	
 INITTXT:
 	LD A,80
-	LD (WIDTH),A
+;
+; SCREEN WIDTH
+;
+CHGWIDTH:	
+	LD (WIDTH),A    ;  BBC-BASIC screen width setting
+	LD (LINL40),A   ;  MSX-BIOS screen width setting
 	JP msxINITXT80
+
+;---------------------------
+;   OSVERCHK
+OSVERCHK:
+	JP msxCheckMSX2
+
+;
+; OS GET TICK
+;
+OSGETTICK:
+	JP msxGETTICK	;
 
 ;------------------------------------------------------------------------------
 ; Check Msx-DOS Version (MSX1 or MSX2)

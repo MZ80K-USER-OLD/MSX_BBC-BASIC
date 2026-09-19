@@ -1,0 +1,35 @@
+; MSX BIOS entry points and system variables.
+
+IFNDEF BDOS
+BDOS		EQU	$0005			; MSX-DOS API CALL
+ENDIF
+
+; MSX BIOS entries
+CALSLT		EQU	$001C
+IDBYT0		EQU	$002B
+INITXT		EQU	$006C			; select screen mode 0
+INIT32		EQU	$006F			; select screen mode 1
+CHSNS		EQU	$009C
+CHGET		EQU	$009F			; 1文字入力
+CHPUT		EQU	$00A2			; 1文字出力
+BEEP		EQU	$00C0
+POSIT		EQU	$00C6			; カーソル位置指定
+CLS		EQU	$00C3			; 画面消去
+PINLINE	EQU	$00AE			; 一行入力
+KILBUF		EQU	$0156			; Clear input buffer
+;
+; BIOS/BASIC  WORK AREA
+;
+BUFMIN		EQU	$F55D			; 入力バッファ-1
+BUF		    EQU	$F55E			; BASIC 入力バッファ、終端が0
+CLIKSW		EQU	$F3DB
+EXPTBL		EQU	$FCC1			; スロットテーブル
+
+LINL40		EQU	$F3AE			; screen width mode 0
+LINL32		EQU	$F3AF			; screen width mode 1
+LINLEN		EQU	$F3B0			; screen width
+CSRY		EQU	$F3DC			; cursor row position
+CSRX		EQU	$F3DD			; cursor column position
+EXBRSA		EQU	$FAF8			; slotid subrom
+JIFFY       EQU $FC9E           ; vsync counter
+CSTYLE      EQU $FCAA           ; cusor style 

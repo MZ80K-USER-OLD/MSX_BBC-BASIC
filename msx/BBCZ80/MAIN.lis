@@ -81,9 +81,9 @@
     80                          	GLOBAL	VERMSG
     81                          	INCLUDE "../msx/obj/BUILDINFO.asm"
 ../msx/obj/BUILDINFO.asm:
-     1  0000  4d53582d444f5332  BUILDMSG: DEFM "MSX-DOS2 BUILD 0074"
+     1  0000  4d53582d444f5332  BUILDMSG: DEFM "MSX-DOS2 BUILD 0092"
               204255494c442030  
-              303734            
+              303932            
      2  0013  0d0a00            DEFB 0DH,0AH,0
      3                          
 ../BBCZ80/MAIN.asm:

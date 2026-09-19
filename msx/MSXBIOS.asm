@@ -17,8 +17,9 @@
 		PUBLIC	msxSetCliksw
 		PUBLIC	msxInitText
 		PUBLIC	msxBeep
+		PUBLIC	msxINITXT40
 		PUBLIC	msxINITXT80
-		PUBLIC	msxINITXT
+		PUBLIC	msxCHGWIDTH
 		PUBLIC	msxCLS
 		PUBLIC	msxSTRPUT
 		PUBLIC  msxCHPUT
@@ -26,39 +27,10 @@
 		PUBLIC  msxPOSIT
 		PUBLIC	msxGETPOS
 		PUBLIC	msxCheckMSX2
-		;
+		PUBLIC	msxGETTICK
 
 
-IFNDEF BDOS
-BDOS		EQU	$0005			; MSX-DOS API CALL
-ENDIF
-; ------------------------------------------------------------------------------
-;  MSX BIOS entries
-;
-CALSLT		EQU	$001C
-IDBYT0		EQU	$002B
-INITXT		EQU	$006C			; select screen mode 0
-INIT32		EQU	$006F			; select screen mode 1
-CHSNS   	EQU $009C
-CHGET   	EQU $009F    		; 1文字入力
-CHPUT   	EQU $00A2    		; 1文字出力
-BEEP		EQU	$00C0
-POSIT		EQU $00C6    		; カーソル位置指定
-CLS		    EQU $00C3    		; 画面消去
-PINLINE		EQU $00AE           ; 一行入力
-KILBUF		EQU $0156           ; Clear input buffer
-
-BUFMIN		EQU $F55D           ; 入力バッファ-1
-BUF		    EQU $F55E           ; BASIC 入力バッファ、終端が0
-CLIKSW		EQU	$F3DB
-EXPTBL		EQU	$FCC1			; スロットテーブル
-
-LINL40		EQU	0F3AEH			; screen width mode 0
-LINL32		EQU	0F3AFH			; screen width mode 1
-LINLEN		EQU	0F3B0H			; screen width
-CSRY		EQU 0F3DCH			; cursor row position
-CSRX		EQU	0F3DDH			; cursor column position
-EXBRSA		EQU	0FAF8H			; slotid subrom
+INCLUDE "MSXBIOS.def"
 
 ; ------------------------------------------------------------------------------
 ; Use MSX BIOS keyboard input which is faster than via CP/M dosKey routine.
@@ -165,26 +137,23 @@ msxPINLINE:
 		INC HL
 		POP IX	
 		RET            ; CTRL-STOPが押されたらCY=1	
-
+;----------------------------------------------------------------------
 ; Init Screen   
 ;  Screen 0, width 40
 ;
-msxINITXT:
-		PUSH  IX
-		LD  A,40
-		LD	(LINL40),A		; set 40 column width
-		LD	IX,INITXT
-		CALL msxBIOS
-		POP IX
-		RET
-;
+msxINITXT40:
+		LD A,40				; set 40 column width
+		JR msxCHGWIDTH
+
 ; Init Screen   
 ;  Screen 0, width 80
 ;
 msxINITXT80:
-		PUSH  IX
-		LD  A,80
-		LD	(LINL40),A		; set 80 column width
+		LD  A,80			; set 80 column width
+msxCHGWIDTH:
+		LD	(LINL40),A		
+msxINITXT:
+		PUSH IX
 		LD	IX,INITXT
 		CALL msxBIOS
 		POP IX
@@ -198,9 +167,15 @@ msxCLS:
 		CALL msxBIOS
 		POP IX
 		RET		
+;
+;
+msxGETTICK:	
+		LD HL,(JIFFY)
+		LD DE,0
+		RET
 
 ;------------------------------------------------------------------------------
-; Check Msx Version (MSX2 or over)
+; Check MSX Version (MSX2 or over)
 ; On MSX1, print message and exit to OS
 ; ------------------------------------------------------------------------------
 msxCheckMSX2:
