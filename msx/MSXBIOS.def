@@ -7,6 +7,7 @@ ENDIF
 ; MSX BIOS entries
 CALSLT		EQU	$001C
 IDBYT0		EQU	$002B
+CHGMOD      EQU $005F
 INITXT		EQU	$006C			; select screen mode 0
 INIT32		EQU	$006F			; select screen mode 1
 CHSNS		EQU	$009C
@@ -14,8 +15,17 @@ CHGET		EQU	$009F			; 1文字入力
 CHPUT		EQU	$00A2			; 1文字出力
 BEEP		EQU	$00C0
 POSIT		EQU	$00C6			; カーソル位置指定
-CLS		EQU	$00C3			; 画面消去
-PINLINE	EQU	$00AE			; 一行入力
+CLRSPR      EQU $0069           ; スプライトの初期化
+CALPAT      EQU $0084           ; スプライトのパターンアドレス計算
+CALATR      EQU $0087           ; スプライトのアトリビュートアドレス計算
+GSPSIZ      EQU $008A           ; スプライトサイズ
+NSTWRT      EQU $0171           ; VDPの書き込みアドレス
+NSETRD      EQU $016E           ; VDPの読み込みアドレス
+LDIRMV      EQU $0059           ; VRAMからメモリへデータをブロック転送します
+LDIRVM      EQU $005C           ; メモリからVRAMへデータをブロック転送します
+
+CLS		EQU	$00C3			    ; 画面消去
+PINLINE	EQU	$00AE			    ; 一行入力
 KILBUF		EQU	$0156			; Clear input buffer
 ;
 ; BIOS/BASIC  WORK AREA
@@ -33,3 +43,4 @@ CSRX		EQU	$F3DD			; cursor column position
 EXBRSA		EQU	$FAF8			; slotid subrom
 JIFFY       EQU $FC9E           ; vsync counter
 CSTYLE      EQU $FCAA           ; cusor style 
+

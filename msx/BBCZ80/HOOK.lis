@@ -40,33 +40,32 @@
     39                          DRAW:
     40                          ENVEL:
     41                          GCOL:
-    42                          MODE:
-    43                          MOVE:
-    44                          PLOT:
-    45                          SOUND:
-    46                          ADVAL:
-    47                          POINT:
-    48                          GETIMS:
-    49                          PUTIMS:
-    50                          CIRCLE:
-    51                          ELLIPS:
-    52                          FILL:
-    53                          MOUSE:
-    54                          ORIGIN:
-    55                          RECTAN:
-    56                          LINE:
-    57                          TINT:
-    58                          TINTFN:
-    59                          MODEFN:
-    60                          WIDFN:
-    61                          WAIT:
-    62                          SYS:
-    63                          CSRON:
-    64                          CSROFF:
-    65  0000  af                	XOR	A
-    66  0001  cd0000            	CALL	EXTERR
-    67  0004  536f727279        	DEFM	"Sorry"
-    68  0009  00                	DEFB	0
-    69                          ;
-    70                          	;END
-    71                          
+    42                          MOVE:
+    43                          PLOT:
+    44                          SOUND:
+    45                          ADVAL:
+    46                          POINT:
+    47                          GETIMS:
+    48                          PUTIMS:
+    49                          CIRCLE:
+    50                          ELLIPS:
+    51                          FILL:
+    52                          MOUSE:
+    53                          ORIGIN:
+    54                          RECTAN:
+    55                          LINE:
+    56                          TINT:
+    57                          TINTFN:
+    58                          MODEFN:
+    59                          WIDFN:
+    60                          WAIT:
+    61                          SYS:
+    62                          CSRON:
+    63                          CSROFF:
+    64  0000  af                	XOR	A
+    65  0001  cd0000            	CALL	EXTERR
+    66  0004  536f727279        	DEFM	"Sorry"
+    67  0009  00                	DEFB	0
+    68                          ;
+    69                          	;END
+    70                          

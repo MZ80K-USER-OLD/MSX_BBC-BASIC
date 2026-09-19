@@ -20,7 +20,13 @@
 		PUBLIC	msxINITXT40
 		PUBLIC	msxINITXT80
 		PUBLIC	msxCHGWIDTH
+		PUBLIC	msxCHGMOD
 		PUBLIC	msxCLS
+		PUBLIC	msxCLRSPR
+		PUBLIC	msxCALATR
+		PUBLIC	msxCALPAT
+		PUBLIC	msxGSPSIZ
+		PUBLIC	msxLDIRVM
 		PUBLIC	msxSTRPUT
 		PUBLIC  msxCHPUT
 		PUBLIC	msxPINLINE
@@ -120,12 +126,12 @@ msxCHPUT:
 		POP IX	
 		RET
 
-;
+; ------------------------------------------------------------------------------
 ; Input line
 ;  INPUT:Nothing
 ;  OUTPUT: HL=Address of input buffer
 ;  CY:CTRL-STOP
-;
+; ------------------------------------------------------------------------------
 msxPINLINE:
 		PUSH IX
 		LD IX,KILBUF
@@ -158,23 +164,99 @@ msxINITXT:
 		CALL msxBIOS
 		POP IX
 		RET
+; ------------------------------------------------------------------------------
 ;
-;	Screen Clear
-;
+; ------------------------------------------------------------------------------
+msxCHGMOD:
+		PUSH IX
+		LD	IX,CHGMOD
+		CALL msxBIOS
+		POP IX
+		RET
+; ------------------------------------------------------------------------------
+; Screen Clear
+; ------------------------------------------------------------------------------
 msxCLS:
 		PUSH IX
 		LD	IX,CLS
 		CALL msxBIOS
 		POP IX
 		RET		
-;
-;
+; ------------------------------------------------------------------------------
+;  CLEAR SPRITES
+; ------------------------------------------------------------------------------
+msxCLRSPR:	
+		PUSH IX
+		LD	IX,CLRSPR
+		CALL msxBIOS
+		POP IX
+		RET
+; ------------------------------------------------------------------------------
+;  CALC　ATTRIBUTE
+;	input A:PatterbNo
+;	output HL:VDP  Attribute address
+; ------------------------------------------------------------------------------
+msxCALATR:
+		PUSH IX
+		LD IX,CALATR
+		CALL msxBIOS
+		POP IX
+		RET
+; ------------------------------------------------------------------------------
+; LDIRMV - Transfer data from VRAM to RAM
+; HL = source VRAM address (all bits valid)
+; DE = destination RAM address
+; BC = length in bytes
+; ------------------------------------------------------------------------------
+msxLDIRMV:
+		PUSH IX
+		LD IX,LDIRMV
+		CALL msxBIOS
+		POP IX
+		RET
+; ------------------------------------------------------------------------------
+; LDIRVM - Transfer data from RAM to VRAM
+; HL = source RAM address
+; DE = destination VRAM address (all bits valid)
+; BC = length in bytes
+; ------------------------------------------------------------------------------	
+msxLDIRVM:
+		PUSH IX
+		LD IX,LDIRVM
+		CALL msxBIOS
+		POP IX
+		RET
+; ------------------------------------------------------------------------------
+; CALC　Pattern Generator ADDRESS
+;	input A:PatterbNo
+;	output HL:VDP  Pattern Generator address
+; ------------------------------------------------------------------------------
+msxCALPAT:
+		PUSH IX
+		LD IX,CALPAT
+		CALL msxBIOS
+		POP IX
+		RET
+
+; ------------------------------------------------------------------------------
+; Get Sprite Pattern Table Size
+; output A: size(bytes)
+; ------------------------------------------------------------------------------
+msxGSPSIZ:
+		PUSH IX
+		LD IX,GSPSIZ
+		CALL msxBIOS
+		POP IX
+		RET
+; ------------------------------------------------------------------------------
+;  vsyncカウンタ
+; ------------------------------------------------------------------------------
 msxGETTICK:	
 		LD HL,(JIFFY)
 		LD DE,0
 		RET
+; ------------------------------------------------------------------------------
 
-;------------------------------------------------------------------------------
 ; Check MSX Version (MSX2 or over)
 ; On MSX1, print message and exit to OS
 ; ------------------------------------------------------------------------------
@@ -183,7 +265,7 @@ msxCheckMSX2:
 		OR	A			; MSX1 ?
 		JP	Z,ERRMSX1	; yep, invalid parameter
 		RET				; CY=0
-
+; ------------------------------------------------------------------------------
 ERRMSX1:	
 		LD	DE, msg
 		LD	C, $09
