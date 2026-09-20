@@ -21,12 +21,15 @@
 		PUBLIC	msxINITXT80
 		PUBLIC	msxCHGWIDTH
 		PUBLIC	msxCHGMOD
+		PUBLIC	msxSETSPRITESIZE
 		PUBLIC	msxCLS
 		PUBLIC	msxCLRSPR
 		PUBLIC	msxCALATR
 		PUBLIC	msxCALPAT
 		PUBLIC	msxGSPSIZ
 		PUBLIC	msxLDIRVM
+		PUBLIC	msxWRTVRM
+		PUBLIC	OSWRTVRM
 		PUBLIC	msxSTRPUT
 		PUBLIC  msxCHPUT
 		PUBLIC	msxPINLINE
@@ -173,6 +176,31 @@ msxCHGMOD:
 		CALL msxBIOS
 		POP IX
 		RET
+
+; Set sprite size and magnification.
+; A = 0/1 for 8x8/16x16, B = 0/1 for normal/double.
+msxSETSPRITESIZE:
+		PUSH BC
+		PUSH DE
+		PUSH HL
+		AND	1
+		ADD	A,A
+		LD	D,A
+		LD	A,B
+		AND	1
+		OR	D
+		LD	D,A
+		LD	A,(RG1SAV)
+		AND	0FCH
+		OR	D
+		LD	(RG1SAV),A
+		LD	B,1
+		LD	IX,WRTVDP
+		CALL	msxBIOS
+		POP HL
+		POP DE
+		POP BC
+		RET
 ; ------------------------------------------------------------------------------
 ; Screen Clear
 ; ------------------------------------------------------------------------------
@@ -226,6 +254,19 @@ msxLDIRVM:
 		CALL msxBIOS
 		POP IX
 		RET
+; ------------------------------------------------------------------------------
+; WRTVRM - Write A to VRAM address HL
+; ------------------------------------------------------------------------------
+msxWRTVRM:
+		PUSH IX
+		LD IX,WRTVRM
+		CALL msxBIOS
+		POP IX
+		RET
+
+; OSWRTVRM - OS-facing entry point for writing one byte to VRAM.
+OSWRTVRM:
+		JP msxWRTVRM
 ; ------------------------------------------------------------------------------
 ; CALC　Pattern Generator ADDRESS
 ;	input A:PatterbNo

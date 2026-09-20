@@ -54,6 +54,86 @@ The MSX-DOS2 build uses DOS2 file handles for `LOAD`, `SAVE`, `OPENIN`,
 paths and do not use CP/M File Control Blocks (FCBs). The FCB implementation is
 retained only in the CP/M-conditional assembly path.
 
+# Recent MSX Command and Token Changes
+
+The current MSX build includes the following command changes.
+
+## `PUT`
+
+`PUT` writes a byte to a Z80 I/O port.
+
+```basic
+PUT port, data
+```
+
+The command evaluates `port` and `data` as numeric expressions and executes the
+Z80 `OUT (C),L` operation. Its token is `&0E` (the version-3 `PUT` token was
+`&CE`). Existing tokenised programs using the old token must be re-tokenised.
+
+## `SPRITE`
+
+`SPRITE` clears and initialises the MSX sprite attribute table through the MSX
+BIOS `CLRSPR` service.
+
+```basic
+SPRITE
+```
+
+`SPRITE` is encoded as a two-byte extension token: prefix `&E6`, followed by
+sub-token `&01`. The lexer inserts the sub-token, and the LIST routine removes
+it again when displaying the program.
+
+The MSX BIOS layer also contains wrappers for sprite-related services such as
+`CALATR`, `CALPAT`, `GSPSIZ`, `LDIRMV`, and `LDIRVM`, but these are internal
+interfaces and are not separate BASIC commands.
+
+## Sprite display, patterns, and modes
+
+The MSX build also supports sprite attribute and pattern operations:
+
+```basic
+PUT SPRITE number,(x,y),colour,pattern
+SPRITE$(pattern)=pattern$
+SPRITE ON
+SPRITE OFF
+SPRITE INIT
+```
+
+`PUT SPRITE` writes the sprite's `Y`, `X`, pattern, and colour attributes to
+the MSX sprite attribute table. `SPRITE$(pattern)=pattern$` copies the pattern
+string to the MSX sprite pattern generator table. `SPRITE OFF` hides the
+sprites, while `SPRITE ON` restores the attributes held by the interpreter;
+`SPRITE INIT` clears the attribute table and enables sprite display.
+
+These forms use the `SPRITE` extension prefix `&E6` and sub-token `&01`; the
+mode words use the existing `ON` and `OFF` tokens, while `INIT` is parsed as
+an ASCII suffix. `SPRITE$` uses the same extension prefix and sub-token,
+followed by the `$` character and its argument expression.
+
+## `MODE` command syntax
+
+The MSX `MODE` command accepts optional sprite size and magnification arguments.
+The syntax is:
+
+```basic
+MODE screen-mode[, sprite-size[, magnification]]
+```
+
+`sprite-size` is `0` for 8x8 or `1` for 16x16 sprites. `magnification` is `0`
+for normal display or `1` for double display. For example, `MODE 2,1,1`
+selects screen mode 2 with 16x16 sprites displayed at double size. The original
+`MODE screen-mode` form remains valid.
+
+## Removed commands
+
+`GCOL` was removed from the keyword table. Its former token `&E6` is now the
+`SPRITE` extension prefix. `GCOL` is therefore no longer accepted as a BASIC
+keyword in the MSX build.
+
+Although the recent change was described as removing `ENVELOPE`, the current
+keyword and command tables still contain `ENVELOPE` with token `&E2`; it is not
+documented as fully removed until those tables are updated.
+
 # Repository Structure
 
 ```text

@@ -8,6 +8,7 @@ ENDIF
 CALSLT		EQU	$001C
 IDBYT0		EQU	$002B
 CHGMOD      EQU $005F
+WRTVDP      EQU $0047           ; write VDP register
 INITXT		EQU	$006C			; select screen mode 0
 INIT32		EQU	$006F			; select screen mode 1
 CHSNS		EQU	$009C
@@ -23,6 +24,7 @@ NSTWRT      EQU $0171           ; VDPの書き込みアドレス
 NSETRD      EQU $016E           ; VDPの読み込みアドレス
 LDIRMV      EQU $0059           ; VRAMからメモリへデータをブロック転送します
 LDIRVM      EQU $005C           ; メモリからVRAMへデータをブロック転送します
+WRTVRM      EQU $004D           ; Aの値をHLのVRAMアドレスへ書き込み
 
 CLS		EQU	$00C3			    ; 画面消去
 PINLINE	EQU	$00AE			    ; 一行入力
@@ -42,5 +44,6 @@ CSRY		EQU	$F3DC			; cursor row position
 CSRX		EQU	$F3DD			; cursor column position
 EXBRSA		EQU	$FAF8			; slotid subrom
 JIFFY       EQU $FC9E           ; vsync counter
+RG1SAV      EQU $F3E0           ; VDP register 1 shadow
 CSTYLE      EQU $FCAA           ; cusor style 
 
