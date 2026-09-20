@@ -21,13 +21,13 @@
 		PUBLIC	msxINITXT80
 		PUBLIC	msxCHGWIDTH
 		PUBLIC	msxCHGMOD
-		PUBLIC	msxSETSPRITESIZE
 		PUBLIC	msxCLS
 		PUBLIC	msxCLRSPR
 		PUBLIC	msxCALATR
 		PUBLIC	msxCALPAT
 		PUBLIC	msxGSPSIZ
 		PUBLIC	msxLDIRVM
+		PUBLIC	msxWRTVDP
 		PUBLIC	msxWRTVRM
 		PUBLIC	OSWRTVRM
 		PUBLIC	msxSTRPUT
@@ -177,30 +177,18 @@ msxCHGMOD:
 		POP IX
 		RET
 
-; Set sprite size and magnification.
-; A = 0/1 for 8x8/16x16, B = 0/1 for normal/double.
-msxSETSPRITESIZE:
-		PUSH BC
-		PUSH DE
-		PUSH HL
-		AND	1
-		ADD	A,A
-		LD	D,A
-		LD	A,B
-		AND	1
-		OR	D
-		LD	D,A
-		LD	A,(RG1SAV)
-		AND	0FCH
-		OR	D
-		LD	(RG1SAV),A
-		LD	B,1
+; Write to VDP Reigster
+;	input: B = value
+;			C= register number
+; ------------------------------------------------------------------------------
+msxWRTVDP:
+		PUSH IX
 		LD	IX,WRTVDP
-		CALL	msxBIOS
-		POP HL
-		POP DE
-		POP BC
+		CALL msxBIOS
+		POP IX
 		RET
+
+
 ; ------------------------------------------------------------------------------
 ; Screen Clear
 ; ------------------------------------------------------------------------------

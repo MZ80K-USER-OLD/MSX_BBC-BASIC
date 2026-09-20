@@ -54,6 +54,9 @@
 	GLOBAL	SPRITE_LEN
 	GLOBAL	SPRITE_SIZE
 	GLOBAL	SPRITE_MAG
+	GLOBAL	CURRENT_SCREEN_MODE
+	GLOBAL	INITIAL_SCREEN_MODE
+	GLOBAL	INITIAL_SCREEN_WIDTH
 	GLOBAL	EXEC_CR_PENDING
 
 	ORG $5000
@@ -110,6 +113,9 @@ SPRITE_NUM:	DEFS	1		;temporary sprite or pattern number
 SPRITE_LEN:	DEFS	1		;temporary sprite pattern length
 SPRITE_SIZE:	DEFS	1		;0=8x8, 1=16x16
 SPRITE_MAG:	DEFS	1		;0=normal, 1=double
+CURRENT_SCREEN_MODE:	DEFS	1	;current MSX screen mode
+INITIAL_SCREEN_MODE:	DEFS	1	;screen mode used at startup
+INITIAL_SCREEN_WIDTH:	DEFS	1	;character width used at startup
 EXEC_CR_PENDING:	DEFS	1	;1=consume LF after CR
 ;-------
 USER:	;END

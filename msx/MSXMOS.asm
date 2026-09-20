@@ -94,7 +94,7 @@
 	EXTERN	msxCheckMSX2
 	EXTERN	msxGETTICK
 	EXTERN	msxCHGMOD
-	EXTERN	msxSETSPRITESIZE
+	EXTERN	msxWRTVDP
 	EXTERN	msxCLRSPR
 	EXTERN	msxCALATR
 	EXTERN	msxCALPAT
@@ -2195,7 +2195,32 @@ OSCHGMOD:
 	JP msxCHGMOD
 
 OSSETSPRITESIZE:
-	JP msxSETSPRITESIZE
+	EX AF,AF'
+	PUSH AF
+	EX AF,AF'
+	PUSH BC
+	PUSH DE
+	PUSH HL
+	AND 1                  ; sprite size: 0=8x8, 1=16x16
+	ADD A,A                ; VDP R#1 bit 1
+	LD D,A
+	LD A,B
+	AND 1                  ; magnification: 0=normal, 1=double
+	OR D                   ; VDP R#1 bit 0 + bit 1
+	LD A,(RG1SAV)
+	AND 0FCH
+	OR D                   ; preserve VDP R#1 bits 2-7
+	LD (RG1SAV),A
+	LD B,A                 ; WRTVDP data
+	LD C,1                 ; VDP register 1
+	CALL msxWRTVDP
+	POP HL
+	POP DE
+	POP BC
+	EX AF,AF'
+	POP AF
+	EX AF,AF'
+	RET
 
 ; MSX sprite APIs
 OSCLRSPR:
