@@ -43,6 +43,7 @@
 	GLOBAL	OSLDIRVM
 	GLOBAL	OSSPRITE
 	GLOBAL	OSSPRITEATTR
+	GLOBAL	OSSPRITEDISP
 
 ; Primary OS routines
 	GLOBAL	CLS
@@ -2207,6 +2208,7 @@ OSSETSPRITESIZE:
 	LD A,B
 	AND 1                  ; magnification: 0=normal, 1=double
 	OR D                   ; VDP R#1 bit 0 + bit 1
+	LD D,A                 ; save combined size+magnification bits
 	LD A,(RG1SAV)
 	AND 0FCH
 	OR D                   ; preserve VDP R#1 bits 2-7
@@ -2291,6 +2293,30 @@ OSSPRITEATTR:
 	CALL OSWRTVRM
 	POP DE
 	POP IX
+	RET
+
+; OSSPRITEDISP - Enable/disable sprite display via VDP R#8 bit 1 (SPD)
+; A = 0 to enable sprites, non-zero to disable
+OSSPRITEDISP:
+	PUSH BC
+	PUSH DE
+	PUSH HL
+	OR A
+	JR Z,OSSPRDISP0
+	LD A,1
+OSSPRDISP0:
+	ADD A,A                ; VDP R#8 bit 1 (SPD)
+	LD D,A
+	LD A,(RG8SAV)
+	AND 0FDH                ; preserve other bits
+	OR D
+	LD (RG8SAV),A
+	LD B,A
+	LD C,8
+	CALL msxWRTVDP
+	POP HL
+	POP DE
+	POP BC
 	RET
 
 ;---------------------------

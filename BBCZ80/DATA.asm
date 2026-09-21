@@ -48,8 +48,7 @@
 	GLOBAL	DOS2_EOF
 	GLOBAL	DOS2_IOBUF
 	GLOBAL	PATHBUF2
-	GLOBAL	SPRITE_ATTR
-	GLOBAL	SPRITE_MODE
+	GLOBAL	SPRITE_BUF
 	GLOBAL	SPRITE_NUM
 	GLOBAL	SPRITE_LEN
 	GLOBAL	SPRITE_SIZE
@@ -107,8 +106,7 @@ PATHBUF:	DEFS	64		;PATH WORK BUFFER FOR MSX-DOS2 / SUBDIR SUPPORT
 PATHBUF2:	DEFS	64		;Second pathname for MSX-DOS2 rename
 DOS_VER:	DEFS	1		;MSX-DOS VERSION
 DIRFIB:	DEFS	64		;MSX-DOS2 FFIRST/FNEXT file information block
-SPRITE_ATTR:	DEFS	128		;MSX sprite attribute shadow (32 sprites x 4 bytes)
-SPRITE_MODE:	DEFS	1		;1=display enabled, 0=display disabled
+SPRITE_BUF:	DEFS	4		;scratch Y,X,pattern,colour buffer for OSSPRITEATTR
 SPRITE_NUM:	DEFS	1		;temporary sprite or pattern number
 SPRITE_LEN:	DEFS	1		;temporary sprite pattern length
 SPRITE_SIZE:	DEFS	1		;0=8x8, 1=16x16

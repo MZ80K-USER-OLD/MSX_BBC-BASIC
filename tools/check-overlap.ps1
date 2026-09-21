@@ -51,6 +51,12 @@ if ($overlaps.Count -gt 0) {
         $second = $overlap.Second
         Write-Error ("Overlapping sections: {0} [{1:X4}-{2:X4}) and {3} [{4:X4}-{5:X4})" -f `
             $first.Name, $first.Head, $first.Tail, $second.Name, $second.Head, $second.Tail)
+        if ($first.Name -eq 'BASICRAM' -or $second.Name -eq 'BASICRAM') {
+            $code = if ($first.Name -eq 'BASICRAM') { $second } else { $first }
+            $ram = if ($first.Name -eq 'BASICRAM') { $first } else { $second }
+            Write-Error ("Program code ({0}) has grown past the BASICRAM origin (`${1:X4} in BBCZ80/DATA.asm) by {2} byte(s). Reduce code size or move BASICRAM." -f `
+                $code.Name, $ram.Head, ($code.Tail - $ram.Head))
+        }
     }
     exit 1
 }

@@ -45,5 +45,6 @@ CSRX		EQU	$F3DD			; cursor column position
 EXBRSA		EQU	$FAF8			; slotid subrom
 JIFFY       EQU $FC9E           ; vsync counter
 RG1SAV      EQU $F3E0           ; VDP register 1 shadow
+RG8SAV      EQU $FFE7           ; VDP register 8 shadow (MSX2 BIOS)
 CSTYLE      EQU $FCAA           ; cusor style 
 
